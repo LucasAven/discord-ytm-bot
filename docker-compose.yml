@@ -1,0 +1,9 @@
+services:
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      # La sesión de YTM se monta de afuera: así cada uno usa su cuenta
+      # sin tener que rebuildear la imagen.
+      - ./browser.json:/app/browser.json:ro
