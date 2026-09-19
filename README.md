@@ -96,15 +96,29 @@ va solo.
 
 ## Pasarle el proyecto a un amigo
 
-Que se clone la carpeta, ponga **su propio** `browser.json` y su `.env`, y corra
-`docker compose up -d`. El único cuidado: **que no lo corran los dos a la vez con
-el mismo `DISCORD_TOKEN`** — Discord abre dos sesiones para el mismo bot y los
-comandos empiezan a responder a duplicado. Si van a alternar, el que arranca
-avisa y el otro hace `docker compose down`.
+Sirve para que el bot siga online cuando vos apagás tu máquina. La idea es que
+tu amigo no necesita ninguna credencial tuya.
 
-Si quieren tener los dos prendido al mismo tiempo, creen dos aplicaciones
-distintas en el Developer Portal (dos bots, dos tokens) e invítenlas al mismo
-server.
+1. Creá una **segunda aplicación** en el Developer Portal, con su propio token,
+   e invitá ese bot al mismo server. Así los dos pueden estar prendidos a la vez
+   y nadie tiene que avisar quién lo está corriendo. Con un solo token compartido
+   Discord abre dos sesiones del mismo bot y los comandos responden duplicado.
+2. Corré `./preparar-copia.sh`, que arma la carpeta en el Escritorio con el
+   código, los dos `.bat` y el `LEEME.txt`. Deja afuera `browser.json`, tu `.env`
+   y el resto de tus cosas.
+3. Completá `DISCORD_TOKEN` y `GUILD_IDS` en el `.env` de esa carpeta, comprimila
+   y mandásela.
+
+Él solo instala Docker Desktop y hace doble clic en `iniciar-bot.bat`. El
+`LEEME.txt` se lo explica todo, incluido cómo apagarlo.
+
+Esa copia corre **sin** `browser.json`, así que pierde tus playlists privadas y
+las recomendaciones atadas a tu cuenta. Todo lo demás anda igual: búsqueda por
+texto, links de YouTube y YouTube Music, y el autoplay por radio.
+
+Si querés que tenga tus playlists, la única forma sana es una cuenta de Google
+aparte para el bot, con las playlists ahí. No le pases tu `browser.json`, que es
+tu sesión de Google entera.
 
 ## Notas
 

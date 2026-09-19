@@ -1,0 +1,90 @@
+BOT DE MUSICA PARA DISCORD
+==========================
+
+Esto hace que el bot de musica aparezca online en el server.
+Mientras tu computadora este prendida con esto andando, cualquiera
+en el server puede pedir temas.
+
+
+LO QUE HAY QUE HACER UNA SOLA VEZ
+---------------------------------
+
+1) Instalar Docker Desktop.
+
+   Bajalo de: https://www.docker.com/products/docker-desktop/
+   Elegi la version para Windows. Es un instalador normal, siguiente
+   y siguiente. Cuando termine te va a pedir reiniciar la
+   computadora. Reinicia.
+
+2) Abri Docker Desktop una vez y dejalo abierto.
+
+   La primera vez tarda un poco en arrancar. Vas a ver un icono de
+   una ballena. Cuando deja de moverse, esta listo.
+
+3) Fijate que en esta carpeta haya un archivo llamado .env
+   Si no esta, pediselo a Lucas. Sin eso el bot no puede entrar.
+
+Listo, eso fue todo. No hay que volver a hacerlo nunca mas.
+
+
+PARA PRENDER EL BOT
+-------------------
+
+Doble clic en:  iniciar-bot.bat
+
+Se abre una ventana negra con texto. La primera vez tarda unos
+minutos porque descarga todo. Cuando dice "Listo. El bot ya esta
+online" ya podes cerrar esa ventana, el bot sigue funcionando.
+
+Si Docker Desktop no estaba abierto, la ventana te lo avisa. Abrilo
+y volve a hacer doble clic.
+
+
+PARA APAGARLO
+-------------
+
+Doble clic en:  apagar-bot.bat
+
+
+COSAS IMPORTANTES
+-----------------
+
+- La computadora tiene que estar prendida y sin suspender. Si se
+  duerme, el bot se cae. Si la vas a dejar andando de noche, andate
+  a Configuracion, Sistema, Inicio/apagado, y poni que la pantalla
+  se apague pero que la computadora no se suspenda.
+
+- Apagar la computadora apaga el bot. No pasa nada malo, la proxima
+  vez lo prendes de nuevo con el doble clic.
+
+- El bot arranca solo cada vez que prendas Docker Desktop, asi que
+  normalmente no vas a tener que tocar nada.
+
+
+COMANDOS EN DISCORD
+-------------------
+
+Se escriben en cualquier canal de texto, empezando con la barra /
+
+  /play <nombre o link>   Pone un tema, una busqueda o una playlist
+  /skip                   Pasa al siguiente
+  /queue                  Muestra la lista de lo que viene
+  /pause  /resume         Pausa y sigue
+  /shuffle                Mezcla la lista
+  /volume <0 a 100>       Volumen
+  /autoplay               Prende o apaga las recomendaciones
+  /stop                   Corta todo y el bot se va del canal
+
+Hay que estar en un canal de voz antes de usar /play
+
+Cuando se termina la lista, el bot sigue solo con temas parecidos.
+
+
+SI ALGO NO ANDA
+---------------
+
+1) Fijate que Docker Desktop este abierto.
+2) Doble clic en apagar-bot.bat, espera unos segundos, y despues
+   doble clic en iniciar-bot.bat
+3) Si sigue sin andar, sacale una foto a la ventana negra y
+   mandasela a Lucas.
