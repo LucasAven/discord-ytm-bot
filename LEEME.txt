@@ -46,6 +46,23 @@ PARA APAGARLO
 Doble clic en:  apagar-bot.bat
 
 
+SI QUERES QUE EL BOT VEA TUS PLAYLISTS (opcional)
+-------------------------------------------------
+
+Sin esto el bot ya funciona: busca temas, acepta links, y cuando se
+termina la lista sigue solo con temas parecidos. Lo unico que no puede
+es abrir TUS playlists de YouTube Music.
+
+Si las queres, doble clic en:  conectar-mi-cuenta.bat
+
+Te va guiando paso por paso. Son unos clics en el navegador y copiar un
+texto. Al final te dice cuantas playlists encontro.
+
+Lo que se genera queda solo en tu computadora y es tu sesion de Google.
+No se lo pases a nadie, ni a Lucas.
+
+Cuando termine, apaga y prende el bot para que la tome.
+
 COSAS IMPORTANTES
 -----------------
 

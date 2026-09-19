@@ -116,6 +116,12 @@ Esa copia corre **sin** `browser.json`, así que pierde tus playlists privadas y
 las recomendaciones atadas a tu cuenta. Todo lo demás anda igual: búsqueda por
 texto, links de YouTube y YouTube Music, y el autoplay por radio.
 
+Si tu amigo quiere sus propias playlists, la copia trae
+`conectar-mi-cuenta.bat`, que lo guía para copiar los headers y arma el
+`browser.json` solo. Le pone la clave `authorization` y detecta si la cuenta es
+de marca, que son los dos pasos que si no se hacen dejan la sesión andando a
+medias sin avisar. Ese archivo es la sesión de Google de él y no se comparte.
+
 Si querés que tenga tus playlists, la única forma sana es una cuenta de Google
 aparte para el bot, con las playlists ahí. No le pases tu `browser.json`, que es
 tu sesión de Google entera.

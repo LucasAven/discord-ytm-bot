@@ -10,9 +10,11 @@ rm -rf "$DESTINO"
 mkdir -p "$DESTINO"
 
 for f in Dockerfile docker-compose.yml requirements.txt bot.py player.py ytm.py \
-         iniciar-bot.bat apagar-bot.bat LEEME.txt; do
+         iniciar-bot.bat apagar-bot.bat conectar-mi-cuenta.bat LEEME.txt; do
     cp "$ORIGEN/$f" "$DESTINO/$f"
 done
+mkdir -p "$DESTINO/herramientas"
+cp "$ORIGEN/herramientas/armar_sesion.py" "$DESTINO/herramientas/"
 
 cat > "$DESTINO/.env" <<'ENV'
 # Token del SEGUNDO bot, no el tuyo. Developer Portal, nueva
