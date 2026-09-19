@@ -38,6 +38,8 @@ class GuildPlayer:
         self._tracks_added = asyncio.Event()
         self._track_finished = asyncio.Event()
         self._radio_seed: str | None = None
+        self._prefetch: tuple[str, discord.AudioSource] | None = None
+        self._prefetch_task: asyncio.Task | None = None
 
         self.task = bot.loop.create_task(self._loop())
 
@@ -51,13 +53,16 @@ class GuildPlayer:
 
     def add_next(self, track: Track) -> None:
         self.queue.insert(0, track)
+        self._drop_prefetch()
         self._tracks_added.set()
 
     def shuffle(self) -> None:
         random.shuffle(self.queue)
+        self._drop_prefetch()
 
     def clear(self) -> None:
         self.queue.clear()
+        self._drop_prefetch()
 
     def skip(self) -> bool:
         vc = self.guild.voice_client
@@ -69,11 +74,59 @@ class GuildPlayer:
     async def stop(self) -> None:
         self.queue.clear()
         self.autoplay = False
+        self._drop_prefetch()
         self.task.cancel()
         vc = self.guild.voice_client
         if vc:
             vc.stop()
             await vc.disconnect()
+
+    # ---------- adelantar el tema que sigue ----------
+
+    def _drop_prefetch(self) -> None:
+        """Tira lo adelantado. Va en cada punto donde cambia cuál es el próximo."""
+        if self._prefetch_task is not None:
+            self._prefetch_task.cancel()
+            self._prefetch_task = None
+        if self._prefetch is not None:
+            self._prefetch[1].cleanup()
+            self._prefetch = None
+
+    def _start_prefetch(self) -> None:
+        """Resuelve y llena el colchón del próximo mientras suena el actual.
+
+        Sin esto el corte entre temas es de 1.8 s, casi todo yt-dlp resolviendo
+        la URL y el colchón llenándose después de que el tema anterior terminó.
+        """
+        if self._prefetch is not None or self._prefetch_task is not None:
+            return
+        if not self.queue:
+            return
+        siguiente = self.queue[0]
+
+        async def preparar() -> None:
+            try:
+                source = await self.ytm.stream_source(siguiente, self.volume)
+            except Exception:
+                log.exception("No pude adelantar %s", siguiente)
+                return
+            finally:
+                self._prefetch_task = None
+            if self.queue and self.queue[0].video_id == siguiente.video_id:
+                self._prefetch = (siguiente.video_id, source)
+            else:
+                source.cleanup()
+
+        self._prefetch_task = self.bot.loop.create_task(preparar())
+
+    def _take_prefetch(self, track: Track) -> discord.AudioSource | None:
+        if self._prefetch is not None and self._prefetch[0] == track.video_id:
+            source = self._prefetch[1]
+            self._prefetch = None
+            source.volume = self.volume
+            return source
+        self._drop_prefetch()
+        return None
 
     # ---------- interno ----------
 
@@ -126,12 +179,14 @@ class GuildPlayer:
                 if vc is None or not vc.is_connected():
                     return
 
-                try:
-                    source = await self.ytm.stream_source(track, self.volume)
-                except Exception:
-                    log.exception("No pude extraer el stream de %s", track)
-                    await self._send(f"⚠️ No pude reproducir **{track}**, sigo con el que viene.")
-                    continue
+                source = self._take_prefetch(track)
+                if source is None:
+                    try:
+                        source = await self.ytm.stream_source(track, self.volume)
+                    except Exception:
+                        log.exception("No pude extraer el stream de %s", track)
+                        await self._send(f"⚠️ No pude reproducir **{track}**, sigo con el que viene.")
+                        continue
 
                 self.current = track
                 self._played_ids.add(track.video_id)
@@ -143,6 +198,7 @@ class GuildPlayer:
                         self._track_finished.set
                     ),
                 )
+                self._start_prefetch()
                 await self._send(embed=self._now_playing_embed(track))
                 await self._track_finished.wait()
                 source.cleanup()
