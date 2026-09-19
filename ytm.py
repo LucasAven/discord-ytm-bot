@@ -144,7 +144,9 @@ class YTMClient:
     """Todo lo que toca la red corre en un thread aparte para no bloquear el loop."""
 
     def __init__(self, auth_file: str | None = None):
-        if auth_file and os.path.exists(auth_file):
+        # isfile y no exists: el volumen del docker-compose crea un directorio
+        # con este nombre cuando el archivo no está, y eso no es una sesión.
+        if auth_file and os.path.isfile(auth_file):
             self.ytm = YTMusic(auth_file)
             self.authenticated = True
             log.info("YTMusic autenticado con %s", auth_file)
