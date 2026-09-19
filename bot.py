@@ -249,15 +249,17 @@ async def volume(interaction: discord.Interaction, nivel: app_commands.Range[int
 
 @bot.tree.command(name="stop", description="Corta todo y se va del canal")
 async def stop(interaction: discord.Interaction):
+    # Discord invalida la interaction a los 3 segundos, y desconectarse del canal
+    # puede tardar más que eso, así que primero avisamos y después cortamos.
+    await interaction.response.defer()
     player = players.pop(interaction.guild.id, None)
     if player:
         await player.stop()
-        await interaction.response.send_message("👋 Listo, me fui.")
     else:
         vc = interaction.guild.voice_client
         if vc:
             await vc.disconnect()
-        await interaction.response.send_message("👋")
+    await interaction.followup.send("👋 Listo, me fui.")
 
 
 if __name__ == "__main__":
