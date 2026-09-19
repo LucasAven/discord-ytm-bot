@@ -1,0 +1,9 @@
+# Secretos: nunca al repo
+.env
+browser.json
+oauth.json
+
+# Python
+.venv/
+__pycache__/
+*.pyc
