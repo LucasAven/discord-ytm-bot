@@ -1,4 +1,4 @@
-discord.py[voice]==2.4.0
+discord.py[voice]>=2.7.1
 yt-dlp>=2025.1.1
 ytmusicapi>=1.8.0
 python-dotenv==1.0.1

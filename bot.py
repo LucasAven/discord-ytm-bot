@@ -44,9 +44,16 @@ async def get_player(interaction: discord.Interaction) -> GuildPlayer | None:
     channel = user.voice.channel
     vc = interaction.guild.voice_client
     if vc is None:
-        await channel.connect(self_deaf=True)
+        vc = await channel.connect(self_deaf=True)
     elif vc.channel != channel:
         await vc.move_to(channel)
+
+    # connect() agota sus 5 intentos y vuelve sin conectar en vez de tirar error,
+    # así que sin este chequeo el bot encola el tema y no suena nada.
+    if not vc.is_connected():
+        await vc.disconnect(force=True)
+        await interaction.followup.send("⚠️ No pude conectarme al canal de voz, probá de nuevo.")
+        return None
 
     player = players.get(interaction.guild.id)
     if player is None or player.task.done():
