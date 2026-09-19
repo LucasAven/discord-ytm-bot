@@ -40,6 +40,13 @@ Te va a pedir que pegues los **request headers** de una request a
 Ese archivo es tu sesión: no lo subas a ningún lado. Dura varios meses; cuando
 caduque, corré el comando de nuevo.
 
+> **Si usás una cuenta de marca** (un canal aparte del personal, con su propio
+> nombre y avatar), copiá los headers con ese canal activo y asegurate de que
+> queden en `browser.json` las claves `x-goog-authuser` y `x-goog-pageid`. Sin
+> ellas el bot se autentica con tu cuenta personal y solo ve `Liked Music` y
+> `Episodes for Later`, sin ningún error que lo avise. Para saber si te está
+> pasando, corré `/playlist` y contá si aparecen todas.
+
 > Podés saltear este paso: el bot arranca igual, pero sin playlists privadas ni
 > recomendaciones personalizadas.
 
