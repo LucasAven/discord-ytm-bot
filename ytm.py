@@ -173,13 +173,16 @@ class YTMClient:
             params = parse_qs(parsed.query)
 
             playlist_id = (params.get("list") or [None])[0]
-            if playlist_id:
-                tracks = await self.get_playlist(playlist_id)
-                return tracks, f"playlist ({len(tracks)} temas)"
-
             video_id = (params.get("v") or [None])[0]
             if not video_id and "youtu.be" in parsed.netloc:
                 video_id = parsed.path.lstrip("/")
+
+            # Los mixes automáticos (list=RD...) no son playlists de verdad y
+            # ytmusicapi no los sabe leer, así que con esos usamos el tema.
+            if playlist_id and not (video_id and playlist_id.startswith("RD")):
+                tracks = await self.get_playlist(playlist_id)
+                return tracks, f"playlist ({len(tracks)} temas)"
+
             if video_id:
                 track = await self.get_track(video_id)
                 return ([track] if track else []), "tema"
