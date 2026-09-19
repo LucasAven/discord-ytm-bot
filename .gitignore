@@ -7,3 +7,6 @@ oauth.json
 .venv/
 __pycache__/
 *.pyc
+
+# Notas locales, no van al repo
+backlog.md
