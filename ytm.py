@@ -214,7 +214,16 @@ class YTMClient:
         )
 
     async def get_playlist(self, playlist_id: str, limit: int = 200) -> list[Track]:
-        data = await self._run(self.ytm.get_playlist, playlist_id, limit)
+        try:
+            data = await self._run(self.ytm.get_playlist, playlist_id, limit)
+        except Exception as e:
+            # YouTube Music contesta sin contenido cuando la playlist no existe
+            # o no es tuya, y ytmusicapi corta con un KeyError que no dice nada.
+            log.info("No pude leer la playlist %s: %s", playlist_id, e)
+            raise ValueError(
+                "No pude abrir esa playlist. Fijate que el link esté bien y que "
+                "sea tuya o pública."
+            ) from e
         tracks = [_to_track(t) for t in data.get("tracks", [])]
         return [t for t in tracks if t]
 
