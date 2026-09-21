@@ -16,6 +16,8 @@ import discord
 import yt_dlp
 from ytmusicapi import YTMusic
 
+import spotify
+
 log = logging.getLogger(__name__)
 
 YDL_OPTS = {
@@ -34,6 +36,10 @@ FFMPEG_BEFORE = (
     "-loglevel warning"
 )
 FFMPEG_OPTS = "-vn"
+
+# Spotify nos da nombres, no video ids, así que una playlist son cien
+# búsquedas. De a ocho tarda unos segundos, todas juntas nos frena YouTube.
+SPOTIFY_BUSQUEDAS = 8
 
 PREBUFFER_FRAMES = 150  # 3 s de audio antes de empezar a sonar
 BUFFER_FRAMES = 750  # tope del colchón, 15 s
@@ -172,6 +178,10 @@ class YTMClient:
 
         if re.match(r"https?://", query):
             parsed = urlparse(query)
+
+            if "spotify.com" in parsed.netloc:
+                return await self._from_spotify(query)
+
             params = parse_qs(parsed.query)
 
             playlist_id = (params.get("list") or [None])[0]
@@ -189,21 +199,56 @@ class YTMClient:
                 track = await self.get_track(video_id)
                 return ([track] if track else []), "tema"
 
-            # Spotify u otro link: caemos a buscar por el texto del link.
-            if "spotify.com" in parsed.netloc:
-                raise ValueError(
-                    "Los links de Spotify no se pueden resolver sin sus credenciales. "
-                    "Pasame el nombre del tema o una playlist de YouTube Music."
-                )
+        track = await self.search_one(query)
+        return ([track], "tema") if track else ([], "nada")
 
-        results = await self._run(self.ytm.search, query, filter="songs", limit=1)
+    async def search_one(self, text: str) -> Track | None:
+        results = await self._run(self.ytm.search, text, filter="songs", limit=1)
         if not results:
-            results = await self._run(self.ytm.search, query, limit=5)
+            results = await self._run(self.ytm.search, text, limit=5)
         for item in results:
             track = _to_track(item)
             if track:
-                return [track], "tema"
-        return [], "nada"
+                return track
+        return None
+
+    # ---------- Spotify ----------
+
+    async def _from_spotify(self, url: str) -> tuple[list[Track], str]:
+        ubicacion = spotify.parse_url(url)
+        if ubicacion is None:
+            raise ValueError(
+                "De Spotify puedo leer links de tema, álbum o playlist. "
+                "Copiá el link con «Compartir» y pasámelo de nuevo."
+            )
+
+        listing = await self._run(spotify.fetch, *ubicacion)
+        tracks = [t for t in await self._search_many(listing.items) if t]
+
+        if listing.kind == "track":
+            return tracks, "tema"
+
+        detalle = f"{listing.kind_name} de Spotify"
+        perdidos = len(listing.items) - len(tracks)
+        if perdidos:
+            detalle += f", {perdidos} que no están en YouTube Music"
+        if listing.truncated:
+            detalle += f", y Spotify no deja ver más de {spotify.TOPE} por lista"
+        return tracks, detalle
+
+    async def _search_many(self, items: list[spotify.Item]) -> list[Track | None]:
+        permiso = asyncio.Semaphore(SPOTIFY_BUSQUEDAS)
+
+        async def buscar(item: spotify.Item) -> Track | None:
+            async with permiso:
+                try:
+                    return await self.search_one(str(item))
+                except Exception as e:
+                    # Un tema que falla no puede voltear la playlist entera.
+                    log.info("No pude buscar «%s»: %s", item, e)
+                    return None
+
+        return await asyncio.gather(*(buscar(i) for i in items))
 
     async def get_track(self, video_id: str) -> Track | None:
         data = await self._run(self.ytm.get_song, video_id)

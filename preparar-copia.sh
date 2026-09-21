@@ -10,6 +10,7 @@ rm -rf "$DESTINO"
 mkdir -p "$DESTINO"
 
 for f in Dockerfile docker-compose.yml requirements.txt bot.py player.py ytm.py \
+         spotify.py \
          iniciar-bot.bat apagar-bot.bat conectar-mi-cuenta.bat LEEME.txt; do
     cp "$ORIGEN/$f" "$DESTINO/$f"
 done

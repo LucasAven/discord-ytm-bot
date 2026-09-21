@@ -81,7 +81,7 @@ python bot.py
 
 | Comando | Qué hace |
 |---|---|
-| `/play <url o búsqueda>` | Tema suelto, playlist de YTM o búsqueda por texto |
+| `/play <url o búsqueda>` | Tema suelto, playlist de YTM, link de Spotify o búsqueda por texto |
 | `/playlist [nombre]` | Lista tus playlists; con nombre, encola la que coincida |
 | `/skip` | Siguiente |
 | `/queue` | Muestra la cola y el estado del autoplay |
@@ -128,10 +128,15 @@ tu sesión de Google entera.
 
 ## Notas
 
-- **Spotify**: la API no entrega audio, solo metadata. Los bots que "reproducen
-  Spotify" en realidad leen los nombres de los temas y los buscan en YouTube.
-  Para eso hace falta registrar una app en el dashboard de Spotify (gratis, pero
-  es el paso de API que querías evitar). Por eso acá está sin soporte.
+- **Spotify**: la API no entrega audio, solo metadata, así que `spotify.py` lee
+  los nombres de los temas y después cada uno se busca en YouTube Music. Lo que
+  suena es la versión de YouTube, que no siempre es la misma grabación.
+  Andan los links de tema, álbum y playlist pública, sin credenciales, porque
+  los datos salen de la página del reproductor incrustable. Dos límites que
+  vienen de Spotify: devuelve **100 temas como máximo** por lista y no dice
+  cuántos eran en total, y es una página web y no una API, así que el día que
+  cambien el formato hay que arreglar el parser. Cuando eso pase, el bot lo
+  detecta y lo dice en el mensaje en vez de romperse.
 - Bajar audio de YouTube por fuera de sus clientes va contra sus Términos de
   Servicio. En un server privado entre amigos el riesgo práctico es bajo, pero
   es tu decisión.

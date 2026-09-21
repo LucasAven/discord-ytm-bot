@@ -84,6 +84,7 @@ COMANDOS EN DISCORD
 Se escriben en cualquier canal de texto, empezando con la barra /
 
   /play <nombre o link>   Pone un tema, una busqueda o una playlist
+                          Acepta links de YouTube Music y de Spotify
   /skip                   Pasa al siguiente
   /queue                  Muestra la lista de lo que viene
   /pause  /resume         Pausa y sigue
