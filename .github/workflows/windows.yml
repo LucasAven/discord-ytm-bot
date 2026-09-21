@@ -1,0 +1,70 @@
+# Compila el .exe para Windows. Hace falta GitHub porque PyInstaller no puede
+# compilar para Windows desde una Mac, así que el runner de Windows es el
+# único lugar donde esto se puede armar.
+name: Ejecutable para Windows
+
+on:
+  workflow_dispatch: # se dispara a mano, desde la pestaña Actions
+  push:
+    tags: ["v*"]
+
+jobs:
+  compilar:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar las dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: Bajar ffmpeg
+        shell: pwsh
+        run: |
+          curl.exe -L -o ffmpeg.zip https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
+          Expand-Archive ffmpeg.zip -DestinationPath ffmpeg-tmp
+          $exe = Get-ChildItem ffmpeg-tmp -Recurse -Filter ffmpeg.exe | Select-Object -First 1
+          if (-not $exe) { throw "el zip de ffmpeg no traia ffmpeg.exe" }
+          Copy-Item $exe.FullName ffmpeg.exe
+          "ffmpeg.exe: {0:N0} MB" -f ((Get-Item ffmpeg.exe).Length / 1MB)
+
+      - name: Compilar
+        run: pyinstaller --noconfirm --clean bot-de-musica.spec
+
+      # Sin esto el build "verde" puede estar entregando un exe que se muere al
+      # arrancar, que es la forma más fácil de mandarle algo roto a alguien.
+      - name: Probar que el exe arranca de verdad
+        shell: pwsh
+        run: |
+          $salida = & ".\dist\bot-de-musica.exe" --autotest 2>&1 | Out-String
+          Write-Host $salida
+          if ($LASTEXITCODE -ne 0) { throw "el exe termino con codigo $LASTEXITCODE" }
+          if ($salida -notmatch "autotest ok") { throw "el exe no paso el autotest" }
+
+      - name: Armar el zip
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path entrega | Out-Null
+          Copy-Item dist\bot-de-musica.exe entrega\
+          Copy-Item LEEME-exe.txt entrega\LEEME.txt
+          Set-Content -Path entrega\.env -Encoding ascii -Value @(
+            "# Pedile este archivo completo a Lucas, o pega el token aca.",
+            "DISCORD_TOKEN=",
+            "",
+            "# El ID del server.",
+            "GUILD_IDS="
+          )
+          Compress-Archive -Path entrega\* -DestinationPath bot-de-musica-windows.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bot-de-musica-windows
+          path: bot-de-musica-windows.zip
+          retention-days: 30

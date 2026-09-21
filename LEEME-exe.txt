@@ -1,0 +1,86 @@
+BOT DE MUSICA PARA DISCORD
+==========================
+
+Esto hace que el bot de musica aparezca online en el server.
+Mientras tu computadora este prendida con esto abierto, cualquiera
+en el server puede pedir temas.
+
+No hay nada que instalar. Son dos archivos y listo.
+
+
+PARA PRENDERLO
+--------------
+
+Doble clic en:  bot-de-musica.exe
+
+Se abre una ventana negra con texto. Cuando dice "Conectado como"
+el bot ya esta online. Dejala abierta.
+
+
+LA PRIMERA VEZ, WINDOWS TE VA A DESCONFIAR
+------------------------------------------
+
+Va a salir un cartel azul que dice "Windows protegio su PC".
+
+Es porque el archivo no esta firmado, que cuesta plata por ano.
+No es un virus. Para seguir:
+
+  1. Hace clic en "Mas informacion".
+  2. Aparece un boton abajo que dice "Ejecutar de todas formas".
+     Apretalo.
+
+Eso se hace una sola vez. Las proximas abre directo.
+
+Si tu antivirus lo borra o lo pone en cuarentena, avisale a Lucas.
+Pasa a veces con este tipo de programas y no significa que este
+infectado, pero mejor que lo mire el.
+
+
+PARA APAGARLO
+-------------
+
+Cerra la ventana negra, o apreta Control+C adentro de ella.
+
+
+COSAS IMPORTANTES
+-----------------
+
+- La computadora tiene que estar prendida y sin suspender. Si se
+  duerme, el bot se cae. Si la vas a dejar andando de noche, andate
+  a Configuracion, Sistema, Inicio/apagado, y poni que la pantalla
+  se apague pero que la computadora no se suspenda.
+
+- El archivo .env que esta al lado tiene la clave del bot. No lo
+  borres ni lo subas a ningun lado.
+
+- Apagar la computadora apaga el bot. No pasa nada malo, la proxima
+  vez lo prendes de nuevo con el doble clic.
+
+
+COMANDOS EN DISCORD
+-------------------
+
+Se escriben en cualquier canal de texto, empezando con la barra /
+
+  /play <nombre o link>   Pone un tema, una busqueda o una playlist
+                          Acepta links de YouTube Music y de Spotify
+  /skip                   Pasa al siguiente
+  /queue                  Muestra la lista de lo que viene
+  /pause  /resume         Pausa y sigue
+  /shuffle                Mezcla la lista
+  /volume <0 a 100>       Volumen
+  /autoplay               Prende o apaga las recomendaciones
+  /stop                   Corta todo y el bot se va del canal
+
+Hay que estar en un canal de voz antes de usar /play
+
+Cuando se termina la lista, el bot sigue solo con temas parecidos.
+
+
+SI ALGO NO ANDA
+---------------
+
+1) Cerra la ventana negra y volve a hacer doble clic.
+2) Fijate que tengas internet.
+3) Si sigue sin andar, sacale una foto a la ventana negra y
+   mandasela a Lucas.

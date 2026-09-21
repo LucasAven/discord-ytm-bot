@@ -10,3 +10,11 @@ __pycache__/
 
 # Notas locales, no van al repo
 backlog.md
+
+# Salida de PyInstaller y el ffmpeg que se baja para compilar
+build/
+dist/
+ffmpeg
+ffmpeg.exe
+ffmpeg.zip
+ffmpeg-tmp/

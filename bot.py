@@ -2,25 +2,31 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
+import subprocess
+import sys
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 
+import rutas
 from player import GuildPlayer
 from ytm import YTMClient
 
-load_dotenv()
+load_dotenv(rutas.carpeta_de_datos() / ".env")
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
 )
 log = logging.getLogger("bot")
 
 TOKEN = os.getenv("DISCORD_TOKEN")
-AUTH_FILE = os.getenv("YTM_AUTH_FILE", "browser.json")
+AUTH_FILE = os.getenv("YTM_AUTH_FILE") or str(
+    rutas.carpeta_de_datos() / "browser.json"
+)
 GUILD_IDS = [
     int(g) for g in os.getenv("GUILD_IDS", "").replace(" ", "").split(",") if g
 ]
@@ -262,7 +268,70 @@ async def stop(interaction: discord.Interaction):
     await interaction.followup.send("👋 Listo, me fui.")
 
 
+async def autotest() -> None:
+    """Prueba que el ejecutable sirva, sin necesidad de token ni de Discord.
+
+    La corre el workflow que compila el .exe. Un build que termina en verde
+    igual puede estar entregando algo que se muere al abrirlo, y esa es la
+    forma más fácil de mandarle a alguien un archivo que no anda.
+    """
+    print(f"python {sys.version.split()[0]} en {sys.platform}, "
+          f"empaquetado={rutas.empaquetado()}")
+    print(f"carpeta de datos: {rutas.carpeta_de_datos()}")
+
+    binario = rutas.ffmpeg()
+    salida = subprocess.run(
+        [binario, "-version"], capture_output=True, text=True, timeout=60
+    )
+    if salida.returncode != 0:
+        raise SystemExit(f"ffmpeg no corre: {binario}")
+    adentro = binario.startswith(getattr(sys, "_MEIPASS", "\0"))
+    print(f"ffmpeg ok ({'adentro del exe' if adentro else 'del PATH'}): "
+          f"{salida.stdout.splitlines()[0]}")
+
+    # Esto es lo que discord.py importa de verdad para cifrar la voz. Chequear
+    # solo `import nacl` da verde con el bot igual de mudo.
+    try:
+        import nacl.secret  # noqa: F401
+        import nacl.utils  # noqa: F401
+    except Exception as e:
+        raise SystemExit(f"PyNaCl no cargo ({e!r}), el bot no podria mandar audio")
+    from discord.voice_client import has_nacl
+
+    if not has_nacl:
+        raise SystemExit("discord.py no ve PyNaCl, el bot no podria mandar audio")
+    print("pynacl ok")
+
+
+    discord.opus._load_default()
+    if discord.opus.is_loaded():
+        print("opus ok")
+    elif sys.platform == "win32":
+        # En Windows discord.py carga el .dll que trae adentro, asi que si aca
+        # falla es que el empaquetado lo perdio y el bot no podria sonar.
+        raise SystemExit("Opus no cargo, el bot no podria mandar audio")
+    else:
+        print("opus no cargo, normal fuera de Windows: ahi sale del sistema")
+
+    tracks, _ = await ytm.resolve("bohemian rhapsody queen")
+    if not tracks:
+        raise SystemExit("La busqueda en YouTube Music no devolvio nada")
+    print(f"busqueda ok: {tracks[0]}")
+
+    tracks, kind = await ytm.resolve(
+        "https://open.spotify.com/album/4m2880jivSbbyEGAKfITCa"
+    )
+    if len(tracks) < 5:
+        raise SystemExit(f"Spotify devolvio solo {len(tracks)} temas")
+    print(f"spotify ok: {len(tracks)} temas ({kind})")
+
+    print("autotest ok")
+
+
 if __name__ == "__main__":
+    if "--autotest" in sys.argv:
+        asyncio.run(autotest())
+        raise SystemExit(0)
     if not TOKEN:
         raise SystemExit("Falta DISCORD_TOKEN en el .env")
     bot.run(TOKEN)

@@ -126,6 +126,30 @@ Si querés que tenga tus playlists, la única forma sana es una cuenta de Google
 aparte para el bot, con las playlists ahí. No le pases tu `browser.json`, que es
 tu sesión de Google entera.
 
+## Ejecutable para Windows (en curso)
+
+La idea es que el amigo no instale Docker. `.github/workflows/windows.yml`
+compila un `.exe` con PyInstaller en un runner de Windows, que es obligatorio
+porque PyInstaller no cross-compila: desde una Mac no se puede.
+
+Se dispara a mano desde la pestaña Actions, o solo al pushear un tag `v*`. El
+artefacto que deja es `bot-de-musica-windows.zip`.
+
+Antes de empaquetar, el workflow corre `bot-de-musica.exe --autotest` sobre el
+ejecutable recién compilado. Ese modo chequea ffmpeg, PyNaCl, Opus, una
+búsqueda en YouTube Music y un link de Spotify. Un build verde sin eso puede
+estar entregando un exe que se muere al abrirlo, que es la peor forma de
+mandarle algo a alguien que no va a saber qué mirar.
+
+`rutas.py` es lo que hace que el mismo código sirva suelto y empaquetado.
+ffmpeg viaja adentro del ejecutable y sale de `sys._MEIPASS`; `.env` y
+`browser.json` quedan al lado del ejecutable para que se puedan cambiar.
+
+**docker2exe y compose2exe no sirven para esto.** Los dos meten la imagen
+adentro de un binario, pero ese binario igual necesita Docker corriendo en la
+máquina que lo ejecuta. Lo dicen los dos README. Sacan la descarga de la
+imagen, no la instalación de Docker Desktop.
+
 ## Notas
 
 - **Spotify**: la API no entrega audio, solo metadata, así que `spotify.py` lee
@@ -146,7 +170,9 @@ tu sesión de Google entera.
 ## Estructura
 
 ```
-bot.py       # slash commands y ciclo de vida
+bot.py       # slash commands, ciclo de vida y el modo --autotest
 player.py    # cola, loop de reproducción y autoplay por guild
 ytm.py       # YouTube Music (búsqueda, playlists, radio) + extracción de audio
+spotify.py   # lee temas de links de Spotify, sin credenciales
+rutas.py     # dónde están los archivos: suelto o adentro del ejecutable
 ```

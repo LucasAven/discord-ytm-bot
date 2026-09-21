@@ -16,6 +16,7 @@ import discord
 import yt_dlp
 from ytmusicapi import YTMusic
 
+import rutas
 import spotify
 
 log = logging.getLogger(__name__)
@@ -294,7 +295,10 @@ class YTMClient:
         info = await self._run(self._extract, track.video_id)
         url = info["url"]
         source = discord.FFmpegPCMAudio(
-            url, before_options=FFMPEG_BEFORE, options=FFMPEG_OPTS
+            url,
+            executable=rutas.ffmpeg(),
+            before_options=FFMPEG_BEFORE,
+            options=FFMPEG_OPTS,
         )
         buffered = BufferedAudioSource(source)
         await self._run(buffered.wait_until_ready)
