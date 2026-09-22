@@ -42,6 +42,52 @@ PARA APAGARLO
 Cerra la ventana negra, o apreta Control+C adentro de ella.
 
 
+OPCIONAL: USAR TUS PROPIAS PLAYLISTS
+------------------------------------
+
+Sin esto el bot igual anda: busca temas, acepta links de YouTube
+Music y de Spotify, y cuando se termina la lista sigue solo con
+temas parecidos. Esto es solo para poder pedirle TUS playlists de
+YouTube Music con el comando /playlist
+
+Lo que hay que hacer es copiar un dato de tu navegador:
+
+  1. Abri  https://music.youtube.com  y fijate de tener tu cuenta
+     iniciada.
+  2. Apreta la tecla F12. Se abre un panel al costado.
+  3. Arriba de ese panel, elegi la solapa "Network".
+  4. Volve a la pagina y hace clic en cualquier cancion, para que
+     se mueva algo.
+  5. En el casillero de filtro escribi:  youtubei
+  6. Hace clic en el PRIMER renglon de la lista.
+  7. Se abre otro panel. Elegi la solapa "Headers".
+  8. Baja hasta "Request Headers". Al lado de ese titulo hay un
+     boton que dice "Raw". Apretalo.
+  9. Busca el renglon que empieza con  cookie:  y copia ESE
+     RENGLON ENTERO. Es largo, tiene que entrar todo.
+
+Despues abri el archivo .env con el Bloc de notas y pega eso
+entre las comillas del renglon YTM_COOKIE, asi:
+
+  YTM_COOKIE="cookie: lo-que-copiaste-va-aca"
+
+Guarda, cerra el Bloc de notas, y abri el bot de nuevo. En la
+ventana negra tiene que decir "Sesion lista" y la lista de tus
+playlists.
+
+Tres cosas para tener en cuenta:
+
+- Ese dato es tu sesion de Google. Cualquiera que lo tenga entra a
+  tu cuenta sin contrasena. No se lo pases a nadie, ni a Lucas. El
+  archivo .env se queda en tu computadora y no se manda a ningun
+  lado.
+- Tiene que quedar todo en UN SOLO renglon. Si el Bloc de notas te
+  lo parte en varios, anda al menu Formato y desactiva "Ajuste de
+  linea".
+- Vence cada varios meses. Cuando el bot deje de ver tus playlists,
+  repeti estos pasos y pega el dato nuevo.
+
+
 COSAS IMPORTANTES
 -----------------
 
@@ -64,6 +110,7 @@ Se escriben en cualquier canal de texto, empezando con la barra /
 
   /play <nombre o link>   Pone un tema, una busqueda o una playlist
                           Acepta links de YouTube Music y de Spotify
+  /playlist [nombre]      Tus playlists (necesita lo de YTM_COOKIE)
   /skip                   Pasa al siguiente
   /queue                  Muestra la lista de lo que viene
   /pause  /resume         Pausa y sigue

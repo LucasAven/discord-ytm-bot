@@ -10,7 +10,7 @@ rm -rf "$DESTINO"
 mkdir -p "$DESTINO"
 
 for f in Dockerfile docker-compose.yml requirements.txt bot.py player.py ytm.py \
-         spotify.py rutas.py \
+         spotify.py rutas.py sesion_ytm.py \
          iniciar-bot.bat apagar-bot.bat conectar-mi-cuenta.bat LEEME.txt; do
     cp "$ORIGEN/$f" "$DESTINO/$f"
 done
@@ -24,6 +24,10 @@ DISCORD_TOKEN=
 
 # El ID del server. El mismo que usas vos.
 GUILD_IDS=
+
+# OPCIONAL. Si en vez de usar conectar-mi-cuenta.bat preferis pegar
+# la cookie a mano, va aca, en un solo renglon y entre comillas.
+YTM_COOKIE=""
 ENV
 
 # La red de seguridad de todo esto: que no se cuele ninguna credencial.

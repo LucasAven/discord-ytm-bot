@@ -145,6 +145,13 @@ mandarle algo a alguien que no va a saber qué mirar.
 ffmpeg viaja adentro del ejecutable y sale de `sys._MEIPASS`; `.env` y
 `browser.json` quedan al lado del ejecutable para que se puedan cambiar.
 
+Para las playlists propias no hay Docker, así que no hay `conectar-mi-cuenta`.
+En su lugar, `YTM_COOKIE` en el `.env`: si está, el bot arma el `browser.json`
+solo al arrancar, con `sesion_ytm.py`, que es el mismo módulo que usa la
+herramienta de Docker. Rehace el archivo cuando la cookie del `.env` cambió, así
+renovarla es pegar la nueva y volver a abrir el bot. Si la cookie no sirve avisa
+en el log y sigue sin sesión, sin pisar el `browser.json` que ya estuviera.
+
 **docker2exe y compose2exe no sirven para esto.** Los dos meten la imagen
 adentro de un binario, pero ese binario igual necesita Docker corriendo en la
 máquina que lo ejecuta. Lo dicen los dos README. Sacan la descarga de la
@@ -175,4 +182,5 @@ player.py    # cola, loop de reproducción y autoplay por guild
 ytm.py       # YouTube Music (búsqueda, playlists, radio) + extracción de audio
 spotify.py   # lee temas de links de Spotify, sin credenciales
 rutas.py     # dónde están los archivos: suelto o adentro del ejecutable
+sesion_ytm.py # arma browser.json desde la cookie del navegador
 ```

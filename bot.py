@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import pathlib
 import subprocess
 import sys
 
@@ -14,6 +15,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 import rutas
+import sesion_ytm
 from player import GuildPlayer
 from ytm import YTMClient
 
@@ -30,6 +32,55 @@ AUTH_FILE = os.getenv("YTM_AUTH_FILE") or str(
 GUILD_IDS = [
     int(g) for g in os.getenv("GUILD_IDS", "").replace(" ", "").split(",") if g
 ]
+YTM_COOKIE = os.getenv("YTM_COOKIE", "")
+
+
+def preparar_sesion_ytm() -> None:
+    """Arma browser.json desde la cookie del .env, que es la unica via sin Docker.
+
+    Rehace el archivo cuando la cookie del .env es otra, asi renovarla es
+    pegar la nueva y volver a abrir el bot. Si algo falla avisa y sigue: el
+    bot anda igual para buscar temas y para el autoplay.
+    """
+    if not YTM_COOKIE.strip():
+        return
+
+    archivo = pathlib.Path(AUTH_FILE)
+    try:
+        cookie = sesion_ytm.limpiar_cookie(YTM_COOKIE)
+    except sesion_ytm.CookieInvalida as e:
+        log.warning("YTM_COOKIE no sirve: %s", e)
+        return
+
+    if archivo.is_file() and sesion_ytm.cookie_guardada(archivo) == cookie:
+        return
+
+    log.info("Armando la sesion de YouTube Music desde YTM_COOKIE...")
+    try:
+        headers, como, playlists = sesion_ytm.armar(cookie)
+    except sesion_ytm.CookieInvalida as e:
+        log.warning("No pude usar YTM_COOKIE: %s", e)
+        return
+    except Exception:
+        log.exception("Se rompio armando la sesion de YouTube Music")
+        return
+
+    try:
+        sesion_ytm.guardar(headers, archivo)
+    except OSError as e:
+        log.warning("No pude escribir %s: %s", archivo, e)
+        return
+
+    log.info("Sesion lista (%s), %d playlists: %s",
+             como, len(playlists), ", ".join(playlists) or "ninguna")
+    if len(playlists) <= 2:
+        log.warning(
+            "Solo aparecen las que YouTube crea solo. Si tenes mas, copia la "
+            "cookie otra vez con tu cuenta activa en music.youtube.com."
+        )
+
+
+preparar_sesion_ytm()
 
 intents = discord.Intents.default()
 intents.voice_states = True

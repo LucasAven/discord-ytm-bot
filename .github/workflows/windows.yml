@@ -55,11 +55,15 @@ jobs:
           Copy-Item dist\bot-de-musica.exe entrega\
           Copy-Item LEEME-exe.txt entrega\LEEME.txt
           Set-Content -Path entrega\.env -Encoding ascii -Value @(
-            "# Pedile este archivo completo a Lucas, o pega el token aca.",
+            "# Pedile estos dos valores a Lucas.",
             "DISCORD_TOKEN=",
+            "GUILD_IDS=",
             "",
-            "# El ID del server.",
-            "GUILD_IDS="
+            "# OPCIONAL, solo si queres que el bot vea TUS playlists de",
+            "# YouTube Music. El LEEME explica de donde sacar esto.",
+            "# Es tu sesion de Google: no se lo pases a nadie.",
+            "# Tiene que quedar todo en un solo renglon.",
+            "YTM_COOKIE=\"\""
           )
           Compress-Archive -Path entrega\* -DestinationPath bot-de-musica-windows.zip
 
