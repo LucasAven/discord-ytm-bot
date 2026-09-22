@@ -63,7 +63,7 @@ jobs:
             "# YouTube Music. El LEEME explica de donde sacar esto.",
             "# Es tu sesion de Google: no se lo pases a nadie.",
             "# Tiene que quedar todo en un solo renglon.",
-            "YTM_COOKIE=\"\""
+            'YTM_COOKIE=""'
           )
           Compress-Archive -Path entrega\* -DestinationPath bot-de-musica-windows.zip
 
