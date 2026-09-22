@@ -138,6 +138,43 @@ async def on_ready():
     log.info("Conectado como %s", bot.user)
 
 
+INTERACTION_DESCONOCIDA = 10062
+
+
+@bot.tree.error
+async def on_app_command_error(
+    interaction: discord.Interaction, error: app_commands.AppCommandError
+) -> None:
+    """Traduce el 10062 a una linea que dice que hacer.
+
+    Discord tira ese error cuando la interaction ya fue respondida, y eso pasa
+    cuando hay dos bots prendidos con el mismo token: los dos reciben el
+    comando y gana el que contesta primero. El traceback por defecto son
+    quince lineas que terminan en un 404 y no nombran la causa. Visto desde
+    Discord engana todavia mas, porque el bot contesta bien y no hace nada.
+    """
+    original = getattr(error, "original", error)
+    comando = interaction.command.name if interaction.command else "?"
+
+    if isinstance(original, discord.NotFound) and original.code == INTERACTION_DESCONOCIDA:
+        log.warning(
+            "/%s no se ejecuto: otra sesion del bot contesto primero. Casi "
+            "seguro hay dos prendidos con el mismo token, apaga uno.",
+            comando,
+        )
+        return
+
+    log.exception("Fallo /%s", comando, exc_info=original)
+    try:
+        aviso = "⚠️ Se rompió ejecutando eso, probá de nuevo."
+        if interaction.response.is_done():
+            await interaction.followup.send(aviso)
+        else:
+            await interaction.response.send_message(aviso)
+    except discord.HTTPException:
+        pass
+
+
 @bot.event
 async def on_voice_state_update(member, before, after):
     """Si el canal queda vacío, el bot se va solo."""
