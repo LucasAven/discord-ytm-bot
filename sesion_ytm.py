@@ -1,9 +1,9 @@
 """Arma la sesión de YouTube Music a partir de la cookie del navegador.
 
-Lo usan dos lugares: la herramienta de Docker (`herramientas/armar_sesion.py`)
-y el bot, que cuando encuentra `YTM_COOKIE` en el `.env` se arma el
-`browser.json` solo. El ejecutable de Windows no tiene Docker, así que esa es
-su única forma de llegar a las playlists propias.
+Lo usa `bot.py` al arrancar: si encuentra `YTM_COOKIE` en el `.env`, se arma el
+`browser.json` solo. Vale igual corriendo con Docker y adentro del ejecutable de
+Windows, que no tiene Docker y por eso no tiene otra forma de llegar a las
+playlists propias.
 
 Hace los dos retoques que `ytmusicapi` no hace y que sin ellos no se nota que
 faltan:

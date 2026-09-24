@@ -28,27 +28,35 @@ No hace falta activar ningún Privileged Intent.
 
 ### 2. Sesión de YouTube Music
 
-```bash
-pip install ytmusicapi
-ytmusicapi browser
-```
+Opcional. Sin esto el bot busca temas, acepta links de YouTube Music y de
+Spotify y hace autoplay; lo que suma es ver **tus** playlists.
 
-Te va a pedir que pegues los **request headers** de una request a
-`music.youtube.com` (DevTools → Network → cualquier request POST a
-`/youtubei/v1/...` → Copy → Copy request headers). Eso genera `browser.json`.
+Se hace pegando la cookie del navegador en `YTM_COOKIE`, dentro del `.env`:
 
-Ese archivo es tu sesión: no lo subas a ningún lado. Dura varios meses; cuando
-caduque, corré el comando de nuevo.
+1. Abrí `music.youtube.com` con tu cuenta iniciada.
+2. F12 → solapa **Network**.
+3. Clic en cualquier tema, para que se mueva algo.
+4. Escribí `youtubei` en el filtro y hacé clic en el primer renglón.
+5. Solapa **Headers** → botón **Raw**, al lado de *Request Headers*.
+6. Copiá el renglón que empieza con `cookie:`.
 
-> **Si usás una cuenta de marca** (un canal aparte del personal, con su propio
-> nombre y avatar), copiá los headers con ese canal activo y asegurate de que
-> queden en `browser.json` las claves `x-goog-authuser` y `x-goog-pageid`. Sin
-> ellas el bot se autentica con tu cuenta personal y solo ve `Liked Music` y
-> `Episodes for Later`, sin ningún error que lo avise. Para saber si te está
-> pasando, corré `/playlist` y contá si aparecen todas.
+Va en un solo renglón y entre comillas. Al arrancar, `sesion_ytm.py` arma el
+`browser.json` solo, y hace los dos retoques que `ytmusicapi` no hace:
 
-> Podés saltear este paso: el bot arranca igual, pero sin playlists privadas ni
-> recomendaciones personalizadas.
+- Calcula la clave `authorization`. Sin ella el archivo se lee como OAuth y
+  `YTMusic()` falla con un error que habla de otra cosa.
+- Detecta si la cuenta es de marca, o sea un canal aparte del personal, y
+  guarda `x-goog-authuser` y `x-goog-pageid`. Sin eso la sesión queda como la
+  cuenta personal, ve solo `Liked Music` y `Episodes for Later`, y los links a
+  playlists propias fallan como si no existieran, sin ningún error que lo avise.
+
+Para comprobar que quedó bien, el log dice `Sesion lista` con la lista, y
+`/playlist` las muestra.
+
+La cookie es tu sesión de Google: no la subas a ningún lado. Vence cada tanto, y
+el síntoma engaña, porque el bot sigue diciendo "YTMusic autenticado" pero deja
+de ver playlists. Pegá la nueva en el `.env` y reiniciá: el archivo se rehace
+solo cuando la cookie cambió.
 
 ### 3. Configurar
 
@@ -96,41 +104,31 @@ va solo.
 
 ## Pasarle el proyecto a un amigo
 
-Sirve para que el bot siga online cuando vos apagás tu máquina. La idea es que
-tu amigo no necesita ninguna credencial tuya.
+Sirve para que el bot siga online cuando vos apagás tu máquina. Él no necesita
+ninguna credencial tuya, ni instalar nada.
 
 1. Creá una **segunda aplicación** en el Developer Portal, con su propio token,
-   e invitá ese bot al mismo server. Así los dos pueden estar prendidos a la vez
-   y nadie tiene que avisar quién lo está corriendo. Con un solo token compartido
-   Discord abre dos sesiones del mismo bot y los comandos responden duplicado.
-2. Corré `./preparar-copia.sh`, que arma la carpeta en el Escritorio con el
-   código, los dos `.bat` y el `LEEME.txt`. Deja afuera `browser.json`, tu `.env`
-   y el resto de tus cosas.
-3. Completá `DISCORD_TOKEN` y `GUILD_IDS` en el `.env` de esa carpeta, comprimila
-   y mandásela.
+   e invitá ese bot al mismo server. Con un token compartido Discord abre dos
+   sesiones del mismo bot: las dos reciben cada comando, gana la que contesta
+   primero y la otra muere con `10062`. El síntoma engaña, porque el bot
+   contesta bien y no hace nada.
+2. Bajá `bot-de-musica-windows.zip` del último run, en la pestaña **Actions**.
+3. Completá `DISCORD_TOKEN` y `GUILD_IDS` en el `.env` que viene adentro del
+   zip, y mandáselo.
 
-Él solo instala Docker Desktop y hace doble clic en `iniciar-bot.bat`. El
-`LEEME.txt` se lo explica todo, incluido cómo apagarlo.
+Él descomprime y hace doble clic en el `.exe`. El `LEEME.txt` del zip le explica
+el resto: el cartel de SmartScreen que sale la primera vez, cómo apagarlo, y
+cómo poner su propia `YTM_COOKIE` si quiere sus playlists.
 
-Esa copia corre **sin** `browser.json`, así que pierde tus playlists privadas y
-las recomendaciones atadas a tu cuenta. Todo lo demás anda igual: búsqueda por
-texto, links de YouTube y YouTube Music, y el autoplay por radio.
+No le pases tu `browser.json` ni tu `YTM_COOKIE`, que son tu sesión de Google
+entera. Si querés que el bot tenga *tus* playlists en la máquina de él, la única
+forma sana es una cuenta de Google aparte para el bot, con las playlists ahí.
 
-Si tu amigo quiere sus propias playlists, la copia trae
-`conectar-mi-cuenta.bat`, que lo guía para copiar los headers y arma el
-`browser.json` solo. Le pone la clave `authorization` y detecta si la cuenta es
-de marca, que son los dos pasos que si no se hacen dejan la sesión andando a
-medias sin avisar. Ese archivo es la sesión de Google de él y no se comparte.
+## Cómo se compila el .exe
 
-Si querés que tenga tus playlists, la única forma sana es una cuenta de Google
-aparte para el bot, con las playlists ahí. No le pases tu `browser.json`, que es
-tu sesión de Google entera.
-
-## Ejecutable para Windows (en curso)
-
-La idea es que el amigo no instale Docker. `.github/workflows/windows.yml`
-compila un `.exe` con PyInstaller en un runner de Windows, que es obligatorio
-porque PyInstaller no cross-compila: desde una Mac no se puede.
+`.github/workflows/windows.yml` lo arma con PyInstaller en un runner de Windows.
+El runner es obligatorio porque PyInstaller no cross-compila: desde una Mac no
+se puede.
 
 Se dispara a mano desde la pestaña Actions, o solo al pushear un tag `v*`. El
 artefacto que deja es `bot-de-musica-windows.zip`.
@@ -145,12 +143,9 @@ mandarle algo a alguien que no va a saber qué mirar.
 ffmpeg viaja adentro del ejecutable y sale de `sys._MEIPASS`; `.env` y
 `browser.json` quedan al lado del ejecutable para que se puedan cambiar.
 
-Para las playlists propias no hay Docker, así que no hay `conectar-mi-cuenta`.
-En su lugar, `YTM_COOKIE` en el `.env`: si está, el bot arma el `browser.json`
-solo al arrancar, con `sesion_ytm.py`, que es el mismo módulo que usa la
-herramienta de Docker. Rehace el archivo cuando la cookie del `.env` cambió, así
-renovarla es pegar la nueva y volver a abrir el bot. Si la cookie no sirve avisa
-en el log y sigue sin sesión, sin pisar el `browser.json` que ya estuviera.
+Las playlists propias van por `YTM_COOKIE`, igual que acá, porque `sesion_ytm.py`
+viaja adentro del ejecutable. Si la cookie no sirve, avisa en el log y sigue sin
+sesión, sin pisar el `browser.json` que ya estuviera.
 
 **docker2exe y compose2exe no sirven para esto.** Los dos meten la imagen
 adentro de un binario, pero ese binario igual necesita Docker corriendo en la
@@ -180,7 +175,7 @@ imagen, no la instalación de Docker Desktop.
 bot.py       # slash commands, ciclo de vida y el modo --autotest
 player.py    # cola, loop de reproducción y autoplay por guild
 ytm.py       # YouTube Music (búsqueda, playlists, radio) + extracción de audio
-spotify.py   # lee temas de links de Spotify, sin credenciales
-rutas.py     # dónde están los archivos: suelto o adentro del ejecutable
+spotify.py    # lee temas de links de Spotify, sin credenciales
+rutas.py      # dónde están los archivos: suelto o adentro del ejecutable
 sesion_ytm.py # arma browser.json desde la cookie del navegador
 ```

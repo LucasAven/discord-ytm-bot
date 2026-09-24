@@ -7,13 +7,3 @@ services:
       # La sesión de YTM se monta de afuera: así cada uno usa su cuenta
       # sin tener que rebuildear la imagen.
       - ./browser.json:/app/browser.json:ro
-
-  # Solo para conectar una cuenta de YouTube Music. Lleva profile así no
-  # arranca con `docker compose up`, y no monta browser.json porque tiene
-  # que poder escribirlo, y ese montaje lo crearía como directorio.
-  configurar:
-    build: .
-    profiles: ["herramientas"]
-    volumes:
-      - ./:/trabajo
-    command: python -u /trabajo/herramientas/armar_sesion.py
